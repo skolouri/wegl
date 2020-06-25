@@ -207,12 +207,19 @@ Finally, we calculate Euclidean geodesics in the embedding space (i.e., the conv
 </p>
 <p style="text-align:center;"><img src="/assets/images/geo.png" width="900" alt style></p>
 
-<p> As the figures demosntrate, the calculated geodesics follow the Wasserstein geodesics, and the linear Wasserstein embedding provides a nonlinear modeling of the distributions.</p>
+<p> As the figures demosntrate, the calculated geodesics follow the Wasserstein geodesics, and the linear Wasserstein embedding provides a nonlinear modeling of the distributions.
+The code to regenerate these demonstration can be found <a href="https://github.com/skolouri/Linear_Optimal_Transport">here</a>.
+</p>
 
 <h5 id="Results"><b>Results</b></h5>
-<p> Here we show the results of WEGL compared with ...</p>
+<p> Here we compare the performance of WEGL on TUD benchmark datasets with the state-of-the-art in GNNs and graph kernels (GKs).</p>
 <p style="text-align:center;"><img src="/assets/images/Table1.png" width="850" alt style></p>
 <p style="text-align:center;"><img src="/assets/images/Table2.png" width="850" alt style></p>
+
+<p>We also tested our algorithm on the molecular property prediction task on the <TT>ogbg-molhiv</TT> dataset [7].
+Table 3 (below) shows the performance of WEGL on this dataset.</p>
+<p style="text-align:center;"><img src="/assets/images/Table3.png" width="850" alt style></p>
+
 
 <h5 id="references"><b>References</b></h5>
 <p>[1] Togninalli, M., Ghisu, E., Llinares-López, F., Rieck, B. and Borgwardt, K., 2019. Wasserstein weisfeiler-lehman graph kernels. In Advances in Neural Information Processing Systems (pp. 6439-6449).</p>
@@ -221,6 +228,7 @@ Finally, we calculate Euclidean geodesics in the embedding space (i.e., the conv
 <p>[4] Kipf, T.N. and Welling, M., 2016. Semi-Supervised Classification with Graph Convolutional Networks. </p>
 <p>[5] Wang, W., Slepčev, D., Basu, S., Ozolek, J.A. and Rohde, G.K., 2013. A linear optimal transportation framework for quantifying and visualizing variations in sets of images. International journal of computer vision, 101(2), pp.254-269.</p>
 <p>[6] Kolouri, S., Tosun, A.B., Ozolek, J.A. and Rohde, G.K., 2016. A continuous linear optimal transport approach for pattern analysis in image datasets. Pattern recognition, 51, pp.453-462. </p>
+<p>[7] Hu, W., Fey, M., Zitnik, M., Dong, Y., Ren, H., Liu, B., Catasta, M. and Leskovec, J., 2020. Open graph benchmark: Datasets for machine learning on graphs. arXiv preprint arXiv:2005.00687.</p>
 <p></p>
 
 
