@@ -1,0 +1,158 @@
+---
+layout: default
+title: Wasserstein Embedding for Graph Learning
+---
+<head>
+<!-- <script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script> -->
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+</head>
+
+<div style="height:25px;">
+<p style="text-align:center;"><a href="https://skolouri.github.io/">Soheil Kolouri</a><sup>1,∗</sup>,
+  <a href="http://navid-naderi.com/">Navid Naderializadeh</a><sup>1,∗</sup>,
+  <a href="https://faculty.virginia.edu/rohde/">Gustavo K. Rohde</a><sup>2</sup>,
+  <a href="http://www.heikohoffmann.de/background.html">Heiko Hoffmann</a><sup>1</sup></p>
+</div>
+<div style="height:20px;">
+<p style="text-align:center;">1: HRL Laboratories, LLC &nbsp;&nbsp;&nbsp;&nbsp; 2: University of Virginia </p>
+</div>
+<!-- <div style="height:25px;">
+<p style="text-align:center;"></p>
+</div> -->
+<div style="height:30px;">
+<p style="text-align:center; font-size:12px"><sup>∗</sup> denotes equal contribution</p>
+</div>
+<div style="height:30px;">
+<br>
+
+<p style="text-align:center;"><img src="{{ site.baseurl }}/assets/images/teaser.png" width="750" alt style></p>
+
+<h5 id="abstract"><b>Abstract</b></h5>
+<p>We present Wasserstein Embedding for Graph Learning (WEGL), a novel and fast framework for embedding entire graphs in a vector space, in which various machine learning models are applicable for graph-level prediction tasks. We leverage new insights on defining similarity between graphs as a function of the similarity between their node embedding distributions. Specifically, we use the Wasserstein distance to measure the dissimilarity between node embeddings of different graphs. Different from prior work, we avoid pairwise calculation of distances between graphs and reduce the computational complexity from quadratic to linear in the number of graphs. WEGL calculates Monge maps from a reference distribution to each node embedding and, based on these maps, creates a fixed-sized vector representation of the graph. We evaluate our new graph embedding approach on various benchmark graph-property prediction tasks, showing state-of-the-art classification performance, while having superior computational efficiency.
+<style="text-align:center; font-size:16px;">
+<strong>Paper: </strong><a href="https://arxiv.org/pdf/2006.09430.pdf">https://arxiv.org/pdf/2006.09430.pdf</a>,&nbsp;&nbsp;
+<strong>Code: </strong><a href="https://github.com/skolouri/">https://github.com/skolouri/</a>
+</p>
+
+<!-- <h5 id="paper"><b>Paper</b></h5>
+<p><a href="https://arxiv.org/pdf/2006.09430.pdf">https://arxiv.org/pdf/2006.09430.pdf</a></p>
+<h5 id="code"><b>Code</b></h5>
+<p><a href="https://github.com/skolouri/">https://github.com/skolouri/</a></p> -->
+
+<h5 id="contributions"><b>Contributions</b></h5>
+<p>
+<li> Reduced computational complexity of estimating the graph Wasserstein distance [1] for a dataset of $M$ graphs from a quadratic complexity in the number of graphs, i.e.,
+   $\frac{M(M-1)}{2}$ calculations, to linear complexity, i.e., $M$ calculations of the Wasserstein distance; and </li>
+<li> An explicit Hilbertian embedding for graphs, which is not restricted to kernel methods, and therefore can be used in conjunction with any downstream classification framework.</li>
+</p>
+
+<h5 id="Method Description"><b>Method Description</b></h5>
+<p> WEGL consists of two stages: 1) node embedding of a graph, 2) linear Wasserstein embedding of the embedded nodes. Below, we describe each of these embeddings.</p>
+
+<h6 id="Node Embedding"><b>Node Embedding</b></h6>
+
+<p> There are many choices for node embedding methods [2].
+  These methods in general could be parametric or non-parametric, for instance, as in propagation/diffusion-based embeddings.
+  Parametric embeddings are often implemented via a GNN encoder.
+  The encoder can capture different graph properties depending on the type of supervision (e.g., supervised or unsupervised).
+  Among the recent work on this topic, self-supervised embedding methods have been shown to be promising [3].
+</p>
+
+<p>For our node embedding process, $h(\cdot)$, we follow a similar non-parametric propagation/diffusion-based encoder as in [1].
+  One of the appealing advantages of this framework is its simplicity, as there are no trainable parameters involved. In short, given a graph $G=(\mathcal{V},\mathcal{E})$
+    with node features $\{x_v\}_{v\in\mathcal{V}}$ and scalar edge features $\{w_{uv}\}_{(u,v)\in\mathcal{E}}$, we use:</p>
+
+<div style="text-align:center">
+\(
+x_v^{(l)}=\sum_{u\in\mathcal{N}_v \cup \{v\}} \frac{w_{uv}}{\sqrt{\mathsf{deg}(u)\mathsf{deg}(v)}}\cdot x_u^{(l-1)}, ~\forall l\in\{1,\dots,L\}, ~\forall v\in\mathcal{V},
+\)
+</div>
+
+where for any node $v\in\mathcal{V}$, its degree $\mathsf{deg}(v)$ is defined as its number of neighbors in $G$ augmented with self-connections,
+   i.e., $\mathsf{deg}(v)\triangleq 1 + |\mathcal{N}_v|$. Note that the normalization of the messages between graph nodes by the (square root of) the two end-point degrees have also been used in other architectures, including GCN [4].
+     For the cases where the edge weights are not available, including self-connection weights $\{w_{vv}\}_{v\in\mathcal{V}}$, we set them to one.
+   Finally, we let $z_v=g\left(\{x_v^{(l)}\}_{l=0}^{L}\right)$ represent the resultant embedding for each node $v\in\mathcal{V}$, where $g(\cdot)$ is a local pooling process on a single node (not a global pooling), e.g., concatenation or averaging.</p>
+
+<p style="text-align:center;"><img src="{{ site.baseurl }}/assets/images/node_embedding.png" width="850" alt style></p>
+
+
+<h6 id="Linear Wasserstein Embedding"><b>Linear Wasserstein Embedding</b></h6>
+
+<p>
+   Linear Wasserstein embedding [5,6] provides an explicit isometric Hilbertian embedding of probability distributions such that the Euclidean distance between the embedded distributions approximates the 2-Wasserstein distance, $\mathcal{W}_2$.
+   We adhere to the definition of the linear Wasserstein embedding for continuous measures. However, all derivations hold for discrete measures as well. More precisely, let $\mu_0$ be a reference probability measure defined on $\mathcal{Z}\subseteq \mathbb{R}^d$, with a positive probability density function $p_0$, s.t. $d\mu_0(z)=p_0(z)dz$ and $p_0(z)>0$ for $\forall z \in \mathcal{Z}$. Let $f_i$ denote the Monge map that pushes $\mu_0$ into $\mu_i$, i.e.,
+\begin{align}
+f_i=\operatorname{argmin}_{f\in MP(\mu_0,\mu_i)} \int_\mathcal{Z}\|z-f(z)\|^2d\mu_0(z).
+\end{align}
+<div class="square">
+<div>
+  <img style="float:right;margin:5px" src="{{ site.baseurl }}/assets/images/lot_panelA.png" width="300">
+</div>
+Define $\phi(\mu_i) \triangleq (f_i-id)\sqrt{p_0}$, where $id(z)=z, \forall z \in \mathcal{Z}$ is the identity function. In cartography, such a mapping is known as the equidistant azimuthal projection, while in differential geometry, it is called the logarithmic map. The mapping $\phi(\cdot)$ has the following characteristics
+<p>
+  <li> $\phi(\cdot)$ provides an isometric embedding for probability measures, i.e., using the Jacobian equation $p_i=det(D f^{-1}_i)p_0(f^{-1}_i)$, where $f_i=\frac{\phi(\mu_i)}{\sqrt{p_0}}+id$.</li>
+  <li> $\phi(\mu_0)=0$, i.e., the reference is mapped to zero. </li>
+  <li> $\|\phi(\mu_i)-\phi(\mu_0)\|_2=\|\phi(\mu_i)\|_2=\mathcal{W}_2(\mu_i,\mu_0)$, i.e., the mapping preserves distances to $\mu_0$. </li>
+  <li> $\|\phi(\mu_i)-\phi(\mu_j)\|_2\approx \mathcal{W}_2(\mu_i,\mu_j)$, i.e., the $\ell_2$ distance between $\phi(\mu_i)$ and $\phi(\mu_j)$, while being a true metric between $\mu_i$ and $\mu_j$, is an approximation of $\mathcal{W}_2(\mu_i,\mu_j)$. </li>
+</p>
+</div>
+</p>
+
+<p>
+  <strong> Discrete Measures:</strong>
+  Consider a set of probability distributions $\{p_i\}_{i=1}^M$, and let
+$Z_i = \big[ z^i_1, \dots , z^i_{N_i} \big]^T \in \mathbb{R}^{N_i\times d}$
+be an array containing $N_i$ i.i.d. samples from distribution $p_i$, i.e., $z^i_k \in \mathbb{R}^d \sim p_i, \forall k\in\{1, \dots, N_i\}$.
+Let us define $p_0$ to be a reference distribution, with $Z_0 = \big[ z^0_1, \dots , z^0_{N} \big]^T \in \mathbb{R}^{N \times d}$
+, where $N=\lfloor \frac{1}{M}\sum_{i=1}^M N_i \rfloor$ and $z^0_j \in \mathbb{R}^d \sim p_0, \forall j\in\{1, \dots, N\}$. The optimal transport plan between $p_i$ and $p_0$, denoted by $\pi_i^*\in \mathbb{R}^{N\times N_i}$, is the solution to the following linear program,
+\vspace{-.05in}
+\begin{equation}
+  \pi_i^* = \operatorname{argmin}_{\pi\in \Pi_i}~\sum_{j=1}^{N}\sum_{k=1}^{N_i} \pi_{jk}\| z^0_j - z^i_k \|^2,
+\end{equation}
+where $\Pi_i\triangleq\Big\{\pi \in \mathbb{R}^{N\times N_i}~\big|~N_i\sum\limits_{j=1}^N \pi_{jk}=N\sum\limits_{k=1}^{N_i} \pi_{jk}=1,~\forall k\in\{1, \dots, N_i\}, \forall j\in\{1, \dots, N\}\Big\}$.
+The Monge map is then approximated from the optimal transport plan by barycentric projection via
+\begin{align}
+F_i= N(\pi_i^* Z_i)\in \mathbb{R}^{N\times d}.
+\end{align}
+Finally, the embedding can be calculated by $\phi(Z_i)=(F_i-Z_0)/\sqrt{N}\in \mathbb{R}^{N\times d}$. With a slight abuse of notation, we use $\phi(p_i)$ and $\phi(Z_i)$ interchangeably throughout the paper. Due to the barycenteric projection, here, $\phi(\cdot)$ is only pseudo-invertible.
+</p>
+
+<p><strong> Numerical Demonstration:</strong>
+  Consider $Z_i = \big[ z^i_1, \dots , z^i_{N_i} \big]^T \in \mathbb{R}^{N_i\times d}$ be samples from scaled and translated ring distributions (as shown below), and let us set the reference distribution to a normal distribution.
+  The figure below shows the optimal transport plan, the result of the barycentric projection to approximate the Monge plan, and the final embedding.
+</p>
+<p style="text-align:center;"><img src="{{ site.baseurl }}/assets/images/embedd_dist.png" width="850" alt style></p>
+<p>
+To demonstrate the modeling capability of the framework, we calculate the mean in the embedding space (i.e., on the vector fields), and invert it to obtain the mean distribution $\bar{p}$.
+The figure below shows the calculated mean, indicating that the linear Wasserstein embedding framework has successfully retrieved a ring distribution as the mean.
+Finally, we calculate Euclidean geodesics in the embedding space (i.e., the convex combination of the vector fields) between $p_i$ and $p_0$, as well as between $p_i$ and $p_j$, and show the inverted geodesics below.
+</p>
+<p style="text-align:center;"><img src="{{ site.baseurl }}/assets/images/geo.png" width="900" alt style></p>
+
+<p> As the figures demosntrate, the calculated geodesics follow the Wasserstein geodesics, and the linear Wasserstein embedding provides a nonlinear modeling of the distributions.</p>
+
+<h5 id="Results"><b>Results</b></h5>
+<p> Here we show the results of WEGL compared with ...</p>
+<p style="text-align:center;"><img src="{{ site.baseurl }}/assets/images/Table1.png" width="850" alt style></p>
+<p style="text-align:center;"><img src="{{ site.baseurl }}/assets/images/Table2.png" width="850" alt style></p>
+
+<h5 id="references"><b>References</b></h5>
+<p>[1] Togninalli, M., Ghisu, E., Llinares-López, F., Rieck, B. and Borgwardt, K., 2019. Wasserstein weisfeiler-lehman graph kernels. In Advances in Neural Information Processing Systems (pp. 6439-6449).</p>
+<p>[2] Chami, I., Abu-El-Haija, S., Perozzi, B., Ré, C. and Murphy, K., 2020. Machine Learning on Graphs: A Model and Comprehensive Taxonomy. arXiv preprint arXiv:2005.03675.</p>
+<p>[3] Hu, W., Liu, B., Gomes, J., Zitnik, M., Liang, P., Pande, V. and Leskovec, J., 2019, September. Strategies for Pre-training Graph Neural Networks. In International Conference on Learning Representations.</p>
+<p>[4] Kipf, T.N. and Welling, M., 2016. Semi-Supervised Classification with Graph Convolutional Networks. </p>
+<p>[5] Wang, W., Slepčev, D., Basu, S., Ozolek, J.A. and Rohde, G.K., 2013. A linear optimal transportation framework for quantifying and visualizing variations in sets of images. International journal of computer vision, 101(2), pp.254-269.</p>
+<p>[6] Kolouri, S., Tosun, A.B., Ozolek, J.A. and Rohde, G.K., 2016. A continuous linear optimal transport approach for pattern analysis in image datasets. Pattern recognition, 51, pp.453-462. </p>
+<p></p>
