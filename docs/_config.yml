@@ -1,7 +1,7 @@
 source:      .
 destination: ./_site
 includes:    ./_includes
-
+url: https://wegl.github.io
 collections:
   projects:
     output: true
