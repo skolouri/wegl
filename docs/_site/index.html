@@ -220,6 +220,12 @@ The code to regenerate these demonstration can be found <a href="https://github.
 Table 3 (below) shows the performance of WEGL on this dataset.</p>
 <p style="text-align:center;"><img src="/assets/images/Table3.png" width="850" alt style></p>
 
+<h6 id="computation"><b>Computation Time</b></h5>
+<p>We compared the algorithmic efficiency of WEGL with GIN and the Wasserstein Weisfeiler-Lehman (WWL) graph kernel. For this experiment, we used the <TT>IMDB-BINARY</TT> dataset and measured the wall-clock training
+and inference times for the three methods (to achieve results reported in Table 1). For WEGL and WWL, we used the exact linear programming solver (as opposed to the entropy-regularized version).
+ We carried out our experiments for WEGL and WWL on a $2.8$ GHz Intel<sup></sup> Core<sup>TM</sup> i7-4980HQ CPU, while we used a <span class="math inline">16</span> GB NVIDIA<sup></sup> Tesla<sup></sup> P100 GPU for GIN. The following figure shows the wall-clock time for training and testing the three algorithms. As the figure illustrates, training WEGL is several orders of magnitude faster than WWL and GIN. During inference, WEGL is slightly slower than GIN (CPU vs. GPU) and significantly faster than WWL. Using GPU-accelerated implementations of the diffusion process and the entropy-regularized transport problem could potentially further enhance the computational efficiency of WEGL during inference.
+</p>
+<p style="text-align:center;"><img src="/assets/images/runtime.png" width="850" alt style></p>
 
 <h5 id="references"><b>References</b></h5>
 <p>[1] Togninalli, M., Ghisu, E., Llinares-López, F., Rieck, B. and Borgwardt, K., 2019. Wasserstein weisfeiler-lehman graph kernels. In Advances in Neural Information Processing Systems (pp. 6439-6449).</p>
